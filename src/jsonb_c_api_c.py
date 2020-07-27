@@ -73,8 +73,9 @@ class generator:
 
     def __deal_with_struct_start(self, parameter):
         [type] = parameter
-        self.__writeline('void jsonb_opt_{0}(jsonb_opt_e opt, cJSON *json, {0} *element, size_t size)'.format(type))
+        self.__writeline('void jsonb_opt_{0}(jsonb_opt_e opt, cJSON *json, void *e, size_t size)'.format(type))
         self.__writeline('{')
+        self.__writeline('    {0} *element= e;'.format(type))
 
     def __deal_with_struct_end(self, parameter):
         self.__writeline('}')
@@ -90,7 +91,7 @@ class generator:
         self.__writeline('        json_child = cJSON_CreateObject();')
         self.__writeline('        cJSON_AddItemToObject(json, "{0}", json_child);'.format(element))
         self.__writeline('    }')
-        self.__writeline('    jsonb_opt_{0}(opt, json_child, &element->{1}, sizeof({2}}));'.format(type, element))
+        self.__writeline('    jsonb_opt_{0}(opt, json_child, &element->{1}, sizeof({0}));'.format(type, element))
         self.__writeline('}')
 
     def __deal_with_string(self, parameter):
@@ -118,7 +119,7 @@ class generator:
         self.__writeline('        json_child = cJSON_CreateArray();')
         self.__writeline('        cJSON_AddItemToObject(json, "{0}", json_child);'.format(element))
         self.__writeline('    }')
-        self.__writeline('    jsonb_opt_array(opt, json_child, element->{0}, sizeof({1})*{2}, jsonb_opt_{1});'.format(element, type, size))
+        self.__writeline('    jsonb_opt_array(opt, json_child, element->{0}, sizeof({1}), {2}, jsonb_opt_{1});'.format(element, type, size))
         self.__writeline('}')
 
     def __deal_with_string_array(self, parameter):
@@ -132,5 +133,5 @@ class generator:
         self.__writeline('        json_child = cJSON_CreateArray();')
         self.__writeline('        cJSON_AddItemToObject(json, "{0}", json_child);'.format(element))
         self.__writeline('    }')
-        self.__writeline('    jsonb_opt_array(opt, json_child, element->{0}, {1}*{2}, jsonb_opt_string);'.format(element, size, length))
+        self.__writeline('    jsonb_opt_array(opt, json_child, element->{0}, {2}, {1}, jsonb_opt_string);'.format(element, size, length))
         self.__writeline('}')

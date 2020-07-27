@@ -73,12 +73,12 @@ class generator:
 
     def __deal_with_struct_start(self, parameter):
         [type] = parameter
-        self.__writeline('typedef struct _{0} {0};'.format(type))
-        self.__writeline('extern void jsonb_opt_{0}(jsonb_opt_e opt, cJSON *json, {0} *element, size_t size);'.format(type))
-        self.__writeline('struct _{0}'.format(type) + ' {')
+        self.__writeline('extern void jsonb_opt_{0}(jsonb_opt_e opt, cJSON *json, void *element, size_t size);'.format(type))
+        self.__writeline('typedef struct {')
 
     def __deal_with_struct_end(self, parameter):
-        self.__writeline('};')
+        [type] = parameter
+        self.__writeline('} ' + '{0};'.format(type))
 
     def __deal_with_field(self, parameter):
         [element, type] = parameter
