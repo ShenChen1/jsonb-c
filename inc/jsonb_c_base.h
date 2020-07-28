@@ -1,6 +1,8 @@
 #ifndef __JSONB_C_BASE_H__
 #define __JSONB_C_BASE_H__
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include "jsonb_c_type.h"
@@ -15,27 +17,58 @@ static inline void jsonb_opt_bool(jsonb_opt_e opt, cJSON *json, void *element, s
     }
 }
 
-static inline void jsonb_opt_int(jsonb_opt_e opt, cJSON *json, void *element, size_t size)
-{
-    if (opt == JSONB_OPT_GET) {
-        if (!cJSON_IsNumber(json)) assert(0);
-        *(int *)element = (int)cJSON_GetNumberValue(json);
-    } else if (opt == JSONB_OPT_SET) {
-        json->type = cJSON_Number;
-        cJSON_SetNumberValue(json, *(int *)element);
-    }
+#define JSONB_OPT_NUMBER(TYPE) \
+static inline void jsonb_opt_##TYPE(jsonb_opt_e opt, cJSON *json, void *element, size_t size) \
+{ \
+    if (opt == JSONB_OPT_GET) { \
+        if (!cJSON_IsNumber(json)) assert(0); \
+        *(TYPE *)element = (TYPE)cJSON_GetNumberValue(json); \
+    } else if (opt == JSONB_OPT_SET) { \
+        json->type = cJSON_Number; \
+        cJSON_SetNumberValue(json, *(TYPE *)element); \
+    } \
 }
 
-static inline void jsonb_opt_double(jsonb_opt_e opt, cJSON *json, void *element, size_t size)
-{
-    if (opt == JSONB_OPT_GET) {
-        if (!cJSON_IsNumber(json)) assert(0);
-        *(double *)element = (double)cJSON_GetNumberValue(json);
-    } else if (opt == JSONB_OPT_SET) {
-        json->type = cJSON_Number;
-        cJSON_SetNumberValue(json, *(double *)element);
-    }
+JSONB_OPT_NUMBER(uint8_t)
+JSONB_OPT_NUMBER(uint16_t)
+JSONB_OPT_NUMBER(uint32_t)
+JSONB_OPT_NUMBER(int8_t)
+JSONB_OPT_NUMBER(int16_t)
+JSONB_OPT_NUMBER(int32_t)
+JSONB_OPT_NUMBER(char)
+JSONB_OPT_NUMBER(short)
+JSONB_OPT_NUMBER(int)
+JSONB_OPT_NUMBER(float)
+JSONB_OPT_NUMBER(double)
+
+#define JSONB_OPT_NUMBER_2(TYPE, FUNC, FORMAT) \
+static inline void jsonb_opt_##TYPE(jsonb_opt_e opt, cJSON *json, void *element, size_t size) \
+{ \
+    if (opt == JSONB_OPT_GET) { \
+        if (!cJSON_IsString(json)) assert(0); \
+        *(TYPE *)element = (TYPE)FUNC(cJSON_GetStringValue(json), NULL, 0); \
+    } else if (opt == JSONB_OPT_SET) { \
+        char tmp[32]; \
+        snprintf(tmp, sizeof(tmp), FORMAT, *(TYPE *)element); \
+        json->type = cJSON_String; \
+        if (json->valuestring) { \
+            cJSON_SetValuestring(json, tmp); \
+        } else { \
+            json->valuestring = cJSON_malloc(strlen(tmp) + 1); \
+            strcpy(json->valuestring, tmp); \
+        } \
+    } \
 }
+
+#if __SIZEOF_POINTER__ == 4
+JSONB_OPT_NUMBER(long)
+JSONB_OPT_NUMBER_2(int64_t, strtoll, "%lld")
+JSONB_OPT_NUMBER_2(uint64_t, strtoull, "%llu")
+#elif __SIZEOF_POINTER__ == 8
+JSONB_OPT_NUMBER_2(long, strtoll, "%zd")
+JSONB_OPT_NUMBER_2(int64_t, strtoll, "%zd")
+JSONB_OPT_NUMBER_2(uint64_t, strtoull, "%zu")
+#endif
 
 static inline void jsonb_opt_string(jsonb_opt_e opt, cJSON *json, void *element, size_t size)
 {
@@ -46,10 +79,10 @@ static inline void jsonb_opt_string(jsonb_opt_e opt, cJSON *json, void *element,
         json->type = cJSON_String;
         if (json->valuestring) {
             cJSON_SetValuestring(json, (char *)element);
-         } else {
+        } else {
             json->valuestring = cJSON_malloc(strlen((char *)element));
             strcpy(json->valuestring, (char *)element);
-         }
+        }
     }
 }
 
@@ -74,6 +107,5 @@ static inline void jsonb_opt_array(jsonb_opt_e opt, cJSON *json, void *e, size_t
         }
     }
 }
-
 
 #endif /* __JSONB_C_BASE_H__ */

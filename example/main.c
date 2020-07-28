@@ -1,17 +1,25 @@
 #include <stdio.h>
+#include <string.h>
 #include "example.h"
 
 static student_t orignal_student = {
     .person = {
         .name = "peter",
         .married = false,
-        .age = 15,
         .height = 180.0,
         .weight = 150.0,
+        .age = 15,
+        .birthday = UINT16_MAX,
         .hometown = "hz",
+        .id = UINT64_MAX,
     },
-    .class = "class",
-    .seat = 123,
+    .class = {
+        .name = "class",
+        .row = CHAR_MIN,
+        .col = SHRT_MIN,
+        .total = LONG_MAX,
+        .id = LONG_MIN,
+    },
     .subjects[0] = "math",
     .subjects[1] = "english",
     .scores[0] = 60,
@@ -20,17 +28,21 @@ static student_t orignal_student = {
         .name = "a",
         .married = true,
         .age = 35,
+        .birthday = UINT32_MAX,
         .height = 170.0,
         .weight = 120.0,
         .hometown = "hz",
+        .id = INT64_MAX,
     },
     .teachers[1] = {
         .name = "b",
         .married = false,
         .age = 30,
+        .birthday = UINT64_MAX,
         .height = 180.0,
         .weight = 160.0,
         .hometown = "hz",
+        .id = INT64_MIN,
     },
 };
 
@@ -46,7 +58,7 @@ int main(void) {
     cJSON_Delete(json);
 
     /* compare */
-    if(memcmp(&orignal_student, &student, sizeof(student_t))) {
+    if (memcmp(&orignal_student, &student, sizeof(student_t))) {
         printf("Converted failed!\n");
     } else {
         printf("Converted OK!\n");

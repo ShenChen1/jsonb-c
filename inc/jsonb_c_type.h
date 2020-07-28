@@ -2,6 +2,8 @@
 #define __JSONB_C_TYPE_H__
 
 #include <stdbool.h>
+#include <stdint.h>
+#include <limits.h>
 #include "cJSON.h"
 
 typedef enum {
