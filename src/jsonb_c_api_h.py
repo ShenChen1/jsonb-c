@@ -22,7 +22,7 @@ class generator:
         logging.debug('source={0}'.format(self.__source))
 
     def installdir(self, path):
-        os.makedirs(path, exist_ok=True)
+        os.system("mkdir -p {0}".format(path))
         self.__dir = path
         logging.debug('installdir={0}'.format(self.__dir))
 
