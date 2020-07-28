@@ -2,6 +2,7 @@ PROJECT := example
 TMP := tmp
 CROSS_COMPILE ?=
 CC := $(CROSS_COMPILE)-gcc
+PREFIX ?= /usr
 
 all: test
 
@@ -16,4 +17,5 @@ clean:
 	rm -rf *.exe $(TMP)
 
 install:
-
+	mkdir -p $(PREFIX)/include
+	cp -av inc/*.h $(PREFIX)/include
