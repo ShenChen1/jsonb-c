@@ -80,7 +80,7 @@ static inline void jsonb_opt_string(jsonb_opt_e opt, cJSON *json, void *element,
         if (json->valuestring) {
             cJSON_SetValuestring(json, (char *)element);
         } else {
-            json->valuestring = cJSON_malloc(strlen((char *)element));
+            json->valuestring = cJSON_malloc(strlen((char *)element) + 1);
             strcpy(json->valuestring, (char *)element);
         }
     }
