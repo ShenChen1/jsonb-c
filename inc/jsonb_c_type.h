@@ -7,8 +7,8 @@
 #include "cJSON.h"
 
 typedef enum {
-    JSONB_OPT_GET,
-    JSONB_OPT_SET,
+    JSONB_OPT_S2J,
+    JSONB_OPT_J2S,
 } jsonb_opt_e;
 
 typedef void (*jsonb_opt_func_t)(jsonb_opt_e opt, cJSON *json, void *element, size_t size);

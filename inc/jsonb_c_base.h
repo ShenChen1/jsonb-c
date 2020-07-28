@@ -9,10 +9,10 @@
 
 static inline void jsonb_opt_bool(jsonb_opt_e opt, cJSON *json, void *element, size_t size)
 {
-    if (opt == JSONB_OPT_GET) {
+    if (opt == JSONB_OPT_J2S) {
         if (!cJSON_IsBool(json)) assert(0);
         *(bool *)element = json->type == cJSON_True ? true : false;
-    } else if (opt == JSONB_OPT_SET) {
+    } else if (opt == JSONB_OPT_S2J) {
         json->type = *(bool *)element ? cJSON_True : cJSON_False;
     }
 }
@@ -20,10 +20,10 @@ static inline void jsonb_opt_bool(jsonb_opt_e opt, cJSON *json, void *element, s
 #define JSONB_OPT_NUMBER(TYPE) \
 static inline void jsonb_opt_##TYPE(jsonb_opt_e opt, cJSON *json, void *element, size_t size) \
 { \
-    if (opt == JSONB_OPT_GET) { \
+    if (opt == JSONB_OPT_J2S) { \
         if (!cJSON_IsNumber(json)) assert(0); \
         *(TYPE *)element = (TYPE)cJSON_GetNumberValue(json); \
-    } else if (opt == JSONB_OPT_SET) { \
+    } else if (opt == JSONB_OPT_S2J) { \
         json->type = cJSON_Number; \
         cJSON_SetNumberValue(json, *(TYPE *)element); \
     } \
@@ -44,10 +44,10 @@ JSONB_OPT_NUMBER(double)
 #define JSONB_OPT_NUMBER_2(TYPE, FUNC, FORMAT) \
 static inline void jsonb_opt_##TYPE(jsonb_opt_e opt, cJSON *json, void *element, size_t size) \
 { \
-    if (opt == JSONB_OPT_GET) { \
+    if (opt == JSONB_OPT_J2S) { \
         if (!cJSON_IsString(json)) assert(0); \
         *(TYPE *)element = (TYPE)FUNC(cJSON_GetStringValue(json), NULL, 0); \
-    } else if (opt == JSONB_OPT_SET) { \
+    } else if (opt == JSONB_OPT_S2J) { \
         char tmp[32]; \
         snprintf(tmp, sizeof(tmp), FORMAT, *(TYPE *)element); \
         json->type = cJSON_String; \
@@ -72,10 +72,10 @@ JSONB_OPT_NUMBER_2(uint64_t, strtoull, "%zu")
 
 static inline void jsonb_opt_string(jsonb_opt_e opt, cJSON *json, void *element, size_t size)
 {
-    if (opt == JSONB_OPT_GET) {
+    if (opt == JSONB_OPT_J2S) {
         if (!cJSON_IsString(json)) assert(0);
         strcpy((char *)element, cJSON_GetStringValue(json));
-    } else if (opt == JSONB_OPT_SET) {
+    } else if (opt == JSONB_OPT_S2J) {
         json->type = cJSON_String;
         if (json->valuestring) {
             cJSON_SetValuestring(json, (char *)element);
@@ -92,14 +92,14 @@ static inline void jsonb_opt_array(jsonb_opt_e opt, cJSON *json, void *e, size_t
     cJSON *child = NULL;
     char *element = e;
 
-    if (opt == JSONB_OPT_GET) {
+    if (opt == JSONB_OPT_J2S) {
         if (!cJSON_IsArray(json)) assert(0);
         assert(cJSON_GetArraySize(json) == array_size);
         for (index = 0; index < array_size; index++) {
             child = cJSON_GetArrayItem(json, index);
             callback(opt, child, element + index * size, size);
         }
-    } else if (opt == JSONB_OPT_SET) {
+    } else if (opt == JSONB_OPT_S2J) {
         for (index = 0; index < array_size; index++) {
             child = cJSON_CreateObject();
             callback(opt, child, element + index * size, size);

@@ -50,11 +50,11 @@ int main(void) {
 
     cJSON *json = NULL;
     json = cJSON_CreateObject();
-    jsonb_opt_student_t(JSONB_OPT_SET, json, &orignal_student, sizeof(student_t));
+    jsonb_opt_student_t(JSONB_OPT_S2J, json, &orignal_student, sizeof(student_t));
     printf("%s\n", cJSON_Print(json));
 
     static student_t student = {};
-    jsonb_opt_student_t(JSONB_OPT_GET, json, &student, sizeof(student_t));
+    jsonb_opt_student_t(JSONB_OPT_J2S, json, &student, sizeof(student_t));
     cJSON_Delete(json);
 
     /* compare */
