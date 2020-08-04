@@ -44,6 +44,12 @@ static student_t orignal_student = {
         .hometown = "hz",
         .id = INT64_MIN,
     },
+    .multi_array_test = {
+        {{11,12}, {13,14}, {15,16}},
+        {{21,22}, {23,24}, {25,26}},
+        {{31,32}, {33,34}, {35,36}},
+        {{41,42}, {43,44}, {45,46}},
+    },
 };
 
 int main(void) {

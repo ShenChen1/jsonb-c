@@ -51,6 +51,7 @@ class generator:
         d['JSONB_STRING'] = self.__deal_with_string
         d['JSONB_FIELD_ARRAY'] = self.__deal_with_field_array
         d['JSONB_STRING_ARRAY'] = self.__deal_with_string_array
+        d['JSONB_MULTI_ARRAY'] = self.__deal_with_multi_array
 
         line = line.strip()
         line = line.replace(" ", "")
@@ -119,7 +120,8 @@ class generator:
         self.__writeline('        json_child = cJSON_CreateArray();')
         self.__writeline('        cJSON_AddItemToObject(json, "{0}", json_child);'.format(element))
         self.__writeline('    }')
-        self.__writeline('    jsonb_opt_array(opt, json_child, element->{0}, sizeof({1}), {2}, jsonb_opt_{1});'.format(element, type, size))
+        self.__writeline('    const size_t array_size_list[] = {' + '{0}, 0'.format(size) + '};')
+        self.__writeline('    jsonb_opt_array(opt, json_child, element->{0}, sizeof({1}) * array_size_list[0], array_size_list, jsonb_opt_{1});'.format(element, type))
         self.__writeline('}')
 
     def __deal_with_string_array(self, parameter):
@@ -133,5 +135,30 @@ class generator:
         self.__writeline('        json_child = cJSON_CreateArray();')
         self.__writeline('        cJSON_AddItemToObject(json, "{0}", json_child);'.format(element))
         self.__writeline('    }')
-        self.__writeline('    jsonb_opt_array(opt, json_child, element->{0}, {2}, {1}, jsonb_opt_string);'.format(element, size, length))
+        self.__writeline('    const size_t array_size_list[] = {' + '{0}, 0'.format(size) + '};')
+        self.__writeline('    jsonb_opt_array(opt, json_child, element->{0}, {1} * array_size_list[0], array_size_list, jsonb_opt_string);'.format(element, length))
+        self.__writeline('}')
+
+    def __deal_with_multi_array(self, parameter):
+        element = parameter[0]
+        type = parameter[-1]
+        num = 1
+        tmp = '{'
+        for p in parameter[1:-1]:
+            if str.isdigit(p) is False:
+                raise RuntimeError("multi_array err: {0} is not digit".format(p))
+            tmp += p + ','
+            num *= int(p)
+        tmp += '0}'
+        self.__writeline('{')
+        self.__writeline('    cJSON *json_child = NULL;')
+        self.__writeline('    if (opt == JSONB_OPT_J2S) {')
+        self.__writeline('        if (cJSON_IsNull(json)) assert(0);')
+        self.__writeline('        json_child = cJSON_GetObjectItem(json, "{0}");'.format(element))
+        self.__writeline('    } else if (opt == JSONB_OPT_S2J) {')
+        self.__writeline('        json_child = cJSON_CreateArray();')
+        self.__writeline('        cJSON_AddItemToObject(json, "{0}", json_child);'.format(element))
+        self.__writeline('    }')
+        self.__writeline('    const size_t array_size_list[] = {0};'.format(tmp))
+        self.__writeline('    jsonb_opt_array(opt, json_child, element->{0}, sizeof({1}) * {2}, array_size_list, jsonb_opt_{1});'.format(element, type, num))
         self.__writeline('}')

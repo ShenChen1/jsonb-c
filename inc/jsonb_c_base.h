@@ -86,23 +86,33 @@ static inline void jsonb_opt_string(jsonb_opt_e opt, cJSON *json, void *element,
     }
 }
 
-static inline void jsonb_opt_array(jsonb_opt_e opt, cJSON *json, void *e, size_t size, size_t array_size, jsonb_opt_func_t callback)
+static inline void jsonb_opt_array(jsonb_opt_e opt, cJSON *json, void *e, size_t size, const size_t *array_size_list, jsonb_opt_func_t callback)
 {
     size_t index = 0;
     cJSON *child = NULL;
     char *element = e;
+    size_t subsize = size / array_size_list[0];
 
     if (opt == JSONB_OPT_J2S) {
         if (!cJSON_IsArray(json)) assert(0);
-        assert(cJSON_GetArraySize(json) == array_size);
-        for (index = 0; index < array_size; index++) {
+        assert(cJSON_GetArraySize(json) == array_size_list[0]);
+        for (index = 0; index < array_size_list[0]; index++) {
             child = cJSON_GetArrayItem(json, index);
-            callback(opt, child, element + index * size, size);
+            if (array_size_list[1]) {
+                jsonb_opt_array(opt, child, element + index * subsize, subsize, &array_size_list[1], callback);
+            } else {
+                callback(opt, child, element + index * subsize, subsize);
+            }
         }
     } else if (opt == JSONB_OPT_S2J) {
-        for (index = 0; index < array_size; index++) {
-            child = cJSON_CreateObject();
-            callback(opt, child, element + index * size, size);
+        for (index = 0; index < array_size_list[0]; index++) {
+            if (array_size_list[1]) {
+                child = cJSON_CreateArray();
+                jsonb_opt_array(opt, child, element + index * subsize, subsize, &array_size_list[1], callback);
+            } else {
+                child = cJSON_CreateObject();
+                callback(opt, child, element + index * subsize, subsize);
+            }
             cJSON_AddItemToArray(json, child);
         }
     }
