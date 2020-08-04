@@ -14,6 +14,7 @@
 | JSONB_FIELD(element, type)                             | Use it for `type element`
 | JSONB_STRING_ARRAY(elements, array_size, string_size)  | Use it for `char elements[array_size][string_size]`
 | JSONB_FIELD_ARRAY(elements, array_size, type)          | Use it for `type elements[array_size]`
+| JSONB_FIELD_ARRAY(elements, one, two, ..., num, type)  | Use it for `type elements[one][two]...[num]`
 
 [example](https://github.com/ShenChen1/jsonb-c/blob/master/example/example.jsonb)
 
@@ -40,8 +41,3 @@ jsonb_opt_student_t(JSONB_OPT_J2S, json, &student, sizeof(student_t));
 ```
 
 [example](https://github.com/ShenChen1/jsonb-c/blob/master/example/main.c)
-
-
-## TODO
-
-Support `XD array` (Multi-dimensional array)
