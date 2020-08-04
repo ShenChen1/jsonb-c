@@ -51,7 +51,6 @@ class generator:
         d['JSONB_STRING'] = self.__deal_with_string
         d['JSONB_FIELD_ARRAY'] = self.__deal_with_field_array
         d['JSONB_STRING_ARRAY'] = self.__deal_with_string_array
-        d['JSONB_MULTI_ARRAY'] = self.__deal_with_multi_array
 
         line = line.strip()
         line = line.replace(" ", "")
@@ -89,15 +88,11 @@ class generator:
         [element, length] = parameter
         self.__writeline('    char {0}[{1}];'.format(element, length))
 
-    def __deal_with_field_array(self, parameter):
-        [element, size, type] = parameter
-        self.__writeline('    {0} {1}[{2}];'.format(type, element, size))
-
     def __deal_with_string_array(self, parameter):
         [element, size, length] = parameter
         self.__writeline('    char {0}[{1}][{2}];'.format(element, size, length))
 
-    def __deal_with_multi_array(self, parameter):
+    def __deal_with_field_array(self, parameter):
         element = parameter[0]
         type = parameter[-1]
         tmp = ""
