@@ -54,8 +54,8 @@ static inline void jsonb_opt_##TYPE(jsonb_opt_e opt, cJSON *json, void *element,
         if (json->valuestring) { \
             cJSON_SetValuestring(json, tmp); \
         } else { \
-            json->valuestring = cJSON_malloc(strlen(tmp) + 1); \
-            strcpy(json->valuestring, tmp); \
+            json->valuestring = cJSON_malloc(sizeof(tmp)); \
+            strncpy(json->valuestring, tmp, sizeof(tmp)); \
         } \
     } \
 }
@@ -74,14 +74,14 @@ static inline void jsonb_opt_string(jsonb_opt_e opt, cJSON *json, void *element,
 {
     if (opt == JSONB_OPT_J2S) {
         if (!cJSON_IsString(json)) assert(0);
-        strcpy((char *)element, cJSON_GetStringValue(json));
+        strncpy((char *)element, cJSON_GetStringValue(json), size);
     } else if (opt == JSONB_OPT_S2J) {
         json->type = cJSON_String;
         if (json->valuestring) {
             cJSON_SetValuestring(json, (char *)element);
         } else {
-            json->valuestring = cJSON_malloc(strlen((char *)element) + 1);
-            strcpy(json->valuestring, (char *)element);
+            json->valuestring = cJSON_malloc(size);
+            strncpy(json->valuestring, (char *)element, size);
         }
     }
 }
