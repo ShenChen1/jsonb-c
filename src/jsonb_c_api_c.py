@@ -45,6 +45,7 @@ class generator:
 
     def __deal_with_file_line(self, line):
         d = {}
+        d['JSONB_INCLUDE_HEADER'] = self.__deal_with_include_header
         d['JSONB_STRUCT_START'] = self.__deal_with_struct_start
         d['JSONB_STRUCT_END'] = self.__deal_with_struct_end
         d['JSONB_FIELD'] = self.__deal_with_field
@@ -69,6 +70,9 @@ class generator:
         self.__writeline('#include "{0}.h"'.format(filename))
 
     def __deal_with_file_end(self, filename):
+        pass
+
+    def __deal_with_include_header(self, parameter):
         pass
 
     def __deal_with_struct_start(self, parameter):
