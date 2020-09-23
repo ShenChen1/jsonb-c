@@ -1,7 +1,6 @@
 PROJECT := example
 TMP := tmp
-CROSS_COMPILE ?=
-CC := $(CROSS_COMPILE)-gcc
+CC := gcc
 PREFIX ?= /usr
 
 all: test
