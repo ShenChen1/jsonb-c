@@ -46,8 +46,8 @@ class generator:
 
     def __deal_with_file_line(self, line):
         d = {}
-        d['JSONB_MACRO_DEFINE'] = self.__deal_with_macro_define
         d['JSONB_INCLUDE_HEADER'] = self.__deal_with_include_header
+        d['JSONB_MACRO_DEFINE'] = self.__deal_with_macro_define
         d['JSONB_STRUCT_START'] = self.__deal_with_struct_start
         d['JSONB_STRUCT_END'] = self.__deal_with_struct_end
         d['JSONB_FIELD'] = self.__deal_with_field

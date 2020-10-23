@@ -15,6 +15,8 @@
 | JSONB_STRING_ARRAY(elements, array_size, string_size)  | Use it for `char elements[array_size][string_size]`
 | JSONB_FIELD_ARRAY(elements, array_size, type)          | Use it for `type elements[array_size]`
 | JSONB_FIELD_ARRAY(elements, one, two, ..., num, type)  | Use it for `type elements[one][two]...[num]`
+| JSONB_INCLUDE_HEADER(file)                             | Use it for `#include <file>`
+| JSONB_MACRO_DEFINE(key, value)                         | Use it for `#define key (value)`
 
 [example](https://github.com/ShenChen1/jsonb-c/blob/master/example/example.jsonb)
 
