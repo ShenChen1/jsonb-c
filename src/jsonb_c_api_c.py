@@ -2,6 +2,7 @@
 
 import sys
 import os
+import re
 import logging
 
 class generator:
@@ -45,6 +46,7 @@ class generator:
 
     def __deal_with_file_line(self, line):
         d = {}
+        d['JSONB_MACRO_DEFINE'] = self.__deal_with_macro_define
         d['JSONB_INCLUDE_HEADER'] = self.__deal_with_include_header
         d['JSONB_STRUCT_START'] = self.__deal_with_struct_start
         d['JSONB_STRUCT_END'] = self.__deal_with_struct_end
@@ -53,14 +55,15 @@ class generator:
         d['JSONB_FIELD_ARRAY'] = self.__deal_with_field_array
         d['JSONB_STRING_ARRAY'] = self.__deal_with_string_array
 
-        line = line.strip()
-        line = line.replace(" ", "")
-        line = line.replace("(", ",")
-        line = line.replace(")", "")
-        func = line.split(',')[0]
-        parameter = line.split(',')[1:]
-        logging.debug('func={0} parameter={1}'.format(func, parameter))
+        pattern = re.compile(r"^(\w+)\((.*)\)$")
+        match = pattern.match(line)
+        if match is None:
+            return
 
+        (func, line) = match.groups()
+        line = line.replace(" ", "")
+        parameter = line.split(',')
+        logging.debug('func={0} parameter={1}'.format(func, parameter))
         if func in d.keys():
             d[func](parameter)
 
@@ -73,6 +76,9 @@ class generator:
         pass
 
     def __deal_with_include_header(self, parameter):
+        pass
+
+    def __deal_with_macro_define(self, parameter):
         pass
 
     def __deal_with_struct_start(self, parameter):
@@ -130,13 +136,11 @@ class generator:
     def __deal_with_field_array(self, parameter):
         element = parameter[0]
         type = parameter[-1]
-        num = 1
+        num = "1"
         tmp = '{'
         for p in parameter[1:-1]:
-            if str.isdigit(p) is False:
-                raise RuntimeError("array err: {0} is not digit".format(p))
             tmp += p + ','
-            num *= int(p)
+            num += ' * ' + p
         tmp += '0}'
         self.__writeline('{')
         self.__writeline('    cJSON *json_child = NULL;')

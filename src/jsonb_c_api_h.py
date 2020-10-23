@@ -2,6 +2,7 @@
 
 import sys
 import os
+import re
 import logging
 
 class generator:
@@ -46,6 +47,7 @@ class generator:
     def __deal_with_file_line(self, line):
         d = {}
         d['JSONB_INCLUDE_HEADER'] = self.__deal_with_include_header
+        d['JSONB_MACRO_DEFINE'] = self.__deal_with_macro_define
         d['JSONB_STRUCT_START'] = self.__deal_with_struct_start
         d['JSONB_STRUCT_END'] = self.__deal_with_struct_end
         d['JSONB_FIELD'] = self.__deal_with_field
@@ -53,14 +55,15 @@ class generator:
         d['JSONB_FIELD_ARRAY'] = self.__deal_with_field_array
         d['JSONB_STRING_ARRAY'] = self.__deal_with_string_array
 
-        line = line.strip()
-        line = line.replace(" ", "")
-        line = line.replace("(", ",")
-        line = line.replace(")", "")
-        func = line.split(',')[0]
-        parameter = line.split(',')[1:]
-        logging.debug('func={0} parameter={1}'.format(func, parameter))
+        pattern = re.compile(r"^(\w+)\((.*)\)$")
+        match = pattern.match(line)
+        if match is None:
+            return
 
+        (func, line) = match.groups()
+        line = line.replace(" ", "")
+        parameter = line.split(',')
+        logging.debug('func={0} parameter={1}'.format(func, parameter))
         if func in d.keys():
             d[func](parameter)
 
@@ -75,6 +78,14 @@ class generator:
     def __deal_with_include_header(self, parameter):
         [file] = parameter
         self.__writeline('#include "{0}"'.format(file))
+
+    def __deal_with_macro_define(self, parameter):
+        key = parameter[0]
+        value = ""
+        for p in parameter[1:-1]:
+            value += p + ','
+        value += parameter[-1]
+        self.__writeline('#define {0} ({1})'.format(key, value))
 
     def __deal_with_struct_start(self, parameter):
         [type] = parameter
