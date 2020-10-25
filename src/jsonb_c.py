@@ -3,8 +3,7 @@
 import sys
 import os
 import argparse
-import jsonb_c_api_h
-import jsonb_c_api_c
+import jsonb_c_api
 
 def main():
     parser = argparse.ArgumentParser(prog='jsonb-c', usage=\
@@ -14,14 +13,11 @@ def main():
     parser.add_argument('--installdir', dest='installdir', help='specify the path of c code', default='./')
     args = parser.parse_args()
 
-    h = jsonb_c_api_h.generator(args.verbose)
-    h.source(args.source)
-    h.installdir(args.installdir)
-    h.run()
-    c = jsonb_c_api_c.generator(args.verbose)
-    c.source(args.source)
-    c.installdir(args.installdir)
-    c.run()
+    jsonb = jsonb_c_api.generator(args.verbose)
+    jsonb.source(args.source)
+    jsonb.installdir(args.installdir)
+    jsonb.run("source")
+    jsonb.run("header")
 
 if __name__ == '__main__':
     main()
