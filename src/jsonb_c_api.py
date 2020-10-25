@@ -73,9 +73,10 @@ class generator:
         d['JSONB_FIELD_ARRAY'] = self.__deal_with_field_array
         d['JSONB_STRING_ARRAY'] = self.__deal_with_string_array
 
-        pattern = re.compile(r"^(\w+)\((\w+|\w+,.*|\w+\(.*\),.*)\)$")
+        pattern = re.compile(r"^(\w+)\(([\w\.]+|\w+,.*|\w+\(.*\),.*)\)$")
         match = pattern.match(line)
         if match is None:
+            logging.debug('ignore line={0}'.format(line))
             return
 
         (func, line) = match.groups()
