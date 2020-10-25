@@ -109,8 +109,12 @@ class generator:
             self.__writeline('#include "{0}"'.format(file))
 
     def __deal_with_macro_define(self, line):
-        parameter = line.split(',')
-        [key, value] = parameter
+        pattern = re.compile(r"^(\w+|\w+\(.*\)),(.*)$")
+        match = pattern.match(line)
+        if match is None:
+            return
+        print(match.groups())
+        (key, value) = match.groups()
         if self.__mode == "header":
             self.__writeline('#define {0} ({1})'.format(key, value))
 
@@ -191,7 +195,6 @@ class generator:
     def __deal_with_field_array(self, line):
         parameter = line.split(',')
         tmp = ""
-        num = "1"
         element = parameter[0]
         type = parameter[-1]
 
@@ -200,6 +203,7 @@ class generator:
                 tmp += '[' + p + ']'
             self.__writeline('    {0} {1}{2};'.format(type, element, tmp))
         else:
+            num = "1"
             tmp = '{'
             for p in parameter[1:-1]:
                 tmp += p + ','
