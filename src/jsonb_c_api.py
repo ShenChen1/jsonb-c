@@ -114,7 +114,6 @@ class generator:
         match = pattern.match(line)
         if match is None:
             return
-        print(match.groups())
         (key, value) = match.groups()
         if self.__mode == "header":
             self.__writeline('#define {0} ({1})'.format(key, value))
