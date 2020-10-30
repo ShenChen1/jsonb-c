@@ -3,6 +3,7 @@ JSONB_MACRO_DEFINE(double(a), (a) * (a))
 JSONB_MACRO_DEFINE(sum(a, b), (a) + (b))
 
 JSONB_INCLUDE_HEADER(math.h)
+JSONB_INCLUDE_HEADER(../inc/test.h)
 
 JSONB_STRUCT_START(person_t)
 JSONB_STRING(name, 32)

@@ -73,7 +73,7 @@ class generator:
         d['JSONB_FIELD_ARRAY'] = self.__deal_with_field_array
         d['JSONB_STRING_ARRAY'] = self.__deal_with_string_array
 
-        pattern = re.compile(r"^(\w+)\(([\w\.]+|\w+,.*|\w+\(.*\),.*)\)$")
+        pattern = re.compile(r"^(\w+)\(([\w\.\/]+|\w+,.*|\w+\(.*\),.*|)\)$")
         match = pattern.match(line)
         if match is None:
             logging.debug('ignore line={0}'.format(line))
@@ -89,8 +89,8 @@ class generator:
         parameter = line.split(',')
         [filename] = parameter
         if self.__mode == "header":
-            self.__writeline('#ifndef __{0}_JSONB_C_API_H__'.format(filename.upper()))
-            self.__writeline('#define __{0}_JSONB_C_API_H__'.format(filename.upper()))
+            self.__writeline('#ifndef __{0}_JSONB_C_API_H__'.format(filename.upper().replace("-", "_")))
+            self.__writeline('#define __{0}_JSONB_C_API_H__'.format(filename.upper().replace("-", "_")))
             self.__writeline('#include "jsonb_c_type.h"')
         else:
             self.__writeline('#include "jsonb_c_type.h"')
@@ -101,7 +101,7 @@ class generator:
         parameter = line.split(',')
         [filename] = parameter
         if self.__mode == "header":
-            self.__writeline('#endif /* __{0}_JSONB_C_API_H__ */'.format(filename.upper()))
+            self.__writeline('#endif /* __{0}_JSONB_C_API_H__ */'.format(filename.upper().replace("-", "_")))
 
     def __deal_with_include_header(self, line):
         parameter = line.split(',')
