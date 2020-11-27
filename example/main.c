@@ -20,6 +20,10 @@ static student_t orignal_student = {
         .total = LONG_MAX,
         .id = LONG_MIN,
     },
+    .union_test = {
+        .condition = 2,
+        .a = 'c',
+    },
     .subjects[0] = "math",
     .subjects[1] = "english",
     .scores[0] = 60,

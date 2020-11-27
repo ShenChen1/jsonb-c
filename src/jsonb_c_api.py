@@ -72,6 +72,9 @@ class generator:
         d['JSONB_STRING'] = self.__deal_with_string
         d['JSONB_FIELD_ARRAY'] = self.__deal_with_field_array
         d['JSONB_STRING_ARRAY'] = self.__deal_with_string_array
+        d['JSONB_UNION_START'] = self.__deal_with_union_start
+        d['JSONB_UNION_END'] = self.__deal_with_union_end
+        d['JSONB_UNION_FIELD'] = self.__deal_with_union_field
 
         pattern = re.compile(r"^(\w+)\(([\w\.\/]+|\w+,.*|\w+\(.*\),.*|)\)$")
         match = pattern.match(line)
@@ -146,7 +149,7 @@ class generator:
             self.__writeline('{')
             self.__writeline('    cJSON *json_child = NULL;')
             self.__writeline('    if (opt == JSONB_OPT_J2S) {')
-            self.__writeline('        if (cJSON_IsNull(json)) assert(0);')
+            self.__writeline('        if (cJSON_IsNull(json)) return;')
             self.__writeline('        json_child = cJSON_GetObjectItem(json, "{0}");'.format(element))
             self.__writeline('    } else if (opt == JSONB_OPT_S2J) {')
             self.__writeline('        json_child = cJSON_CreateObject();')
@@ -164,7 +167,7 @@ class generator:
             self.__writeline('{')
             self.__writeline('    cJSON *json_child = NULL;')
             self.__writeline('    if (opt == JSONB_OPT_J2S) {')
-            self.__writeline('        if (cJSON_IsNull(json)) assert(0);')
+            self.__writeline('        if (cJSON_IsNull(json)) return;')
             self.__writeline('        json_child = cJSON_GetObjectItem(json, "{0}");'.format(element))
             self.__writeline('    } else if (opt == JSONB_OPT_S2J) {')
             self.__writeline('        json_child = cJSON_CreateObject();')
@@ -182,7 +185,7 @@ class generator:
             self.__writeline('{')
             self.__writeline('    cJSON *json_child = NULL;')
             self.__writeline('    if (opt == JSONB_OPT_J2S) {')
-            self.__writeline('        if (cJSON_IsNull(json)) assert(0);')
+            self.__writeline('        if (cJSON_IsNull(json)) return;')
             self.__writeline('        json_child = cJSON_GetObjectItem(json, "{0}");'.format(element))
             self.__writeline('    } else if (opt == JSONB_OPT_S2J) {')
             self.__writeline('        json_child = cJSON_CreateArray();')
@@ -212,7 +215,7 @@ class generator:
             self.__writeline('{')
             self.__writeline('    cJSON *json_child = NULL;')
             self.__writeline('    if (opt == JSONB_OPT_J2S) {')
-            self.__writeline('        if (cJSON_IsNull(json)) assert(0);')
+            self.__writeline('        if (cJSON_IsNull(json)) return;')
             self.__writeline('        json_child = cJSON_GetObjectItem(json, "{0}");'.format(element))
             self.__writeline('    } else if (opt == JSONB_OPT_S2J) {')
             self.__writeline('        json_child = cJSON_CreateArray();')
@@ -221,3 +224,63 @@ class generator:
             self.__writeline('    const size_t array_size_list[] = {0};'.format(tmp))
             self.__writeline('    jsonb_opt_array(opt, json_child, element->{0}, sizeof({1}) * {2}, array_size_list, jsonb_opt_{1});'.format(element, type, num))
             self.__writeline('}')
+
+    def __deal_with_union_start(self, line):
+        parameter = line.split(',')
+        [type] = parameter
+        if self.__mode == "header":
+            self.__writeline('extern void jsonb_opt_{0}(jsonb_opt_e opt, cJSON *json, void *element, size_t size);'.format(type))
+            self.__writeline('typedef struct {')
+            self.__writeline('    {0} {1};'.format('int', 'condition'))
+            self.__writeline('    union {')
+        else:
+            self.__writeline('void jsonb_opt_{0}(jsonb_opt_e opt, cJSON *json, void *e, size_t size)'.format(type))
+            self.__writeline('{')
+            self.__writeline('    {0} *element= e;'.format(type))
+            self.__writeline('{')
+            self.__writeline('    cJSON *json_child = NULL;')
+            self.__writeline('    if (opt == JSONB_OPT_J2S) {')
+            self.__writeline('        if (cJSON_IsNull(json)) return;')
+            self.__writeline('        json_child = cJSON_GetObjectItem(json, "{0}");'.format('condition'))
+            self.__writeline('    } else if (opt == JSONB_OPT_S2J) {')
+            self.__writeline('        json_child = cJSON_CreateObject();')
+            self.__writeline('        cJSON_AddItemToObject(json, "{0}", json_child);'.format('condition'))
+            self.__writeline('    }')
+            self.__writeline('    jsonb_opt_{0}(opt, json_child, &element->{1}, sizeof({0}));'.format('int', 'condition'))
+            self.__writeline('}')
+            self.__writeline('switch (element->{0})'.format('condition'))
+            self.__writeline('{')
+
+    def __deal_with_union_end(self, line):
+        parameter = line.split(',')
+        [type] = parameter
+        if self.__mode == "header":
+            self.__writeline('    };')
+            self.__writeline('} ' + '{0};'.format(type))
+        else:
+            self.__writeline('    default:')
+            self.__writeline('    {')
+            self.__writeline('        assert(0);')
+            self.__writeline('    }')
+            self.__writeline('}')
+            self.__writeline('}')
+
+    def __deal_with_union_field(self, line):
+        parameter = line.split(',')
+        [element, type, condition] = parameter
+        if self.__mode == "header":
+            self.__writeline('        {0} {1};'.format(type, element))
+        else:
+            self.__writeline('    case {0}:'.format(condition))
+            self.__writeline('    {')
+            self.__writeline('        cJSON *json_child = NULL;')
+            self.__writeline('        if (opt == JSONB_OPT_J2S) {')
+            self.__writeline('            if (cJSON_IsNull(json)) return;')
+            self.__writeline('            json_child = cJSON_GetObjectItem(json, "{0}");'.format(element))
+            self.__writeline('        } else if (opt == JSONB_OPT_S2J) {')
+            self.__writeline('            json_child = cJSON_CreateObject();')
+            self.__writeline('            cJSON_AddItemToObject(json, "{0}", json_child);'.format(element))
+            self.__writeline('        }')
+            self.__writeline('        jsonb_opt_{0}(opt, json_child, &element->{1}, sizeof({0}));'.format(type, element))
+            self.__writeline('        break;')
+            self.__writeline('    }')
