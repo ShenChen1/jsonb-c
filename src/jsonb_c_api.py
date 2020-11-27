@@ -260,7 +260,7 @@ class generator:
         else:
             self.__writeline('    default:')
             self.__writeline('    {')
-            self.__writeline('        assert(0);')
+            self.__writeline('        break;')
             self.__writeline('    }')
             self.__writeline('}')
             self.__writeline('}')

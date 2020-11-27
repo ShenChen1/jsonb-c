@@ -10,7 +10,7 @@
 static inline void jsonb_opt_bool(jsonb_opt_e opt, cJSON *json, void *element, size_t size)
 {
     if (opt == JSONB_OPT_J2S) {
-        if (!cJSON_IsBool(json)) assert(0);
+        if (!cJSON_IsBool(json)) return;
         *(bool *)element = json->type == cJSON_True ? true : false;
     } else if (opt == JSONB_OPT_S2J) {
         json->type = *(bool *)element ? cJSON_True : cJSON_False;
@@ -21,7 +21,7 @@ static inline void jsonb_opt_bool(jsonb_opt_e opt, cJSON *json, void *element, s
 static inline void jsonb_opt_##TYPE(jsonb_opt_e opt, cJSON *json, void *element, size_t size) \
 { \
     if (opt == JSONB_OPT_J2S) { \
-        if (!cJSON_IsNumber(json)) assert(0); \
+        if (!cJSON_IsNumber(json)) return; \
         *(TYPE *)element = (TYPE)cJSON_GetNumberValue(json); \
     } else if (opt == JSONB_OPT_S2J) { \
         json->type = cJSON_Number; \
@@ -45,7 +45,7 @@ JSONB_OPT_NUMBER(double)
 static inline void jsonb_opt_##TYPE(jsonb_opt_e opt, cJSON *json, void *element, size_t size) \
 { \
     if (opt == JSONB_OPT_J2S) { \
-        if (!cJSON_IsString(json)) assert(0); \
+        if (!cJSON_IsString(json)) return; \
         *(TYPE *)element = (TYPE)FUNC(cJSON_GetStringValue(json), NULL, 0); \
     } else if (opt == JSONB_OPT_S2J) { \
         char tmp[32]; \
@@ -73,7 +73,7 @@ JSONB_OPT_NUMBER_2(uint64_t, strtoull, "%zu")
 static inline void jsonb_opt_string(jsonb_opt_e opt, cJSON *json, void *element, size_t size)
 {
     if (opt == JSONB_OPT_J2S) {
-        if (!cJSON_IsString(json)) assert(0);
+        if (!cJSON_IsString(json)) return;
         strncpy((char *)element, cJSON_GetStringValue(json), size);
     } else if (opt == JSONB_OPT_S2J) {
         json->type = cJSON_String;
@@ -94,7 +94,7 @@ static inline void jsonb_opt_array(jsonb_opt_e opt, cJSON *json, void *e, size_t
     size_t subsize = size / array_size_list[0];
 
     if (opt == JSONB_OPT_J2S) {
-        if (!cJSON_IsArray(json)) assert(0);
+        if (!cJSON_IsArray(json)) return;
         assert(cJSON_GetArraySize(json) == array_size_list[0]);
         for (index = 0; index < array_size_list[0]; index++) {
             child = cJSON_GetArrayItem(json, index);
