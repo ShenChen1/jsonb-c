@@ -19,7 +19,7 @@
 | JSONB_MACRO_DEFINE(key, value)                         | Use it for `#define key (value)`
 | JSONB_UNION_START(type)                                | Use it to start declaring a union named `type`
 | JSONB_UNION_END(type)                                  | Use it at the end of union declaration
-| JSONB_UNION_FIELD(element, type, condition)            | Use it for `type element` in union depending on `condition`
+| JSONB_UNION_FIELD(element, type)                       | Use it for `type element` in union depending on `condition`
 
 [example](https://github.com/ShenChen1/jsonb-c/blob/master/example/example.jsonb)
 

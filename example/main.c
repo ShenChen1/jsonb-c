@@ -21,7 +21,7 @@ static student_t orignal_student = {
         .id = LONG_MIN,
     },
     .union_test = {
-        .condition = 2,
+        .condition = "b",
         .a = 'c',
     },
     .subjects[0] = "math",
