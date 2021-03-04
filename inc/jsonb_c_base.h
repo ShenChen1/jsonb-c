@@ -49,13 +49,14 @@ static inline void jsonb_opt_##TYPE(jsonb_opt_e opt, cJSON *json, void *element,
         *(TYPE *)element = (TYPE)FUNC(cJSON_GetStringValue(json), NULL, 0); \
     } else if (opt == JSONB_OPT_S2J) { \
         char tmp[32]; \
-        snprintf(tmp, sizeof(tmp), FORMAT, *(TYPE *)element); \
+        int len = snprintf(tmp, sizeof(tmp), FORMAT, *(TYPE *)element); \
         json->type = cJSON_String; \
         if (json->valuestring) { \
             cJSON_SetValuestring(json, tmp); \
         } else { \
             json->valuestring = cJSON_malloc(sizeof(tmp)); \
-            strncpy(json->valuestring, tmp, sizeof(tmp)); \
+            memcpy(json->valuestring, tmp, len); \
+            json->valuestring[len] = '\0'; \
         } \
     } \
 }
@@ -74,14 +75,20 @@ static inline void jsonb_opt_string(jsonb_opt_e opt, cJSON *json, void *element,
 {
     if (opt == JSONB_OPT_J2S) {
         if (!cJSON_IsString(json)) return;
-        strncpy((char *)element, cJSON_GetStringValue(json), size);
+        char *tmp = cJSON_GetStringValue(json);
+        size_t len = strnlen(tmp, size - 1);
+        memcpy(element, tmp, len);
+        ((char *)element)[len] = '\0';
     } else if (opt == JSONB_OPT_S2J) {
+        char *tmp = (char *)element;
         json->type = cJSON_String;
         if (json->valuestring) {
-            cJSON_SetValuestring(json, (char *)element);
+            cJSON_SetValuestring(json, tmp);
         } else {
             json->valuestring = cJSON_malloc(size);
-            strncpy(json->valuestring, (char *)element, size);
+            size_t len = strnlen(tmp, size - 1);
+            memcpy(json->valuestring, tmp, len);
+            json->valuestring[len] = '\0';
         }
     }
 }
