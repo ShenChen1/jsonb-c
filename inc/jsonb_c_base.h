@@ -95,7 +95,7 @@ static inline void jsonb_opt_array(jsonb_opt_e opt, cJSON *json, void *e, size_t
 
     if (opt == JSONB_OPT_J2S) {
         if (!cJSON_IsArray(json)) return;
-        assert(cJSON_GetArraySize(json) == array_size_list[0]);
+        if (cJSON_GetArraySize(json) != array_size_list[0]) return;
         for (index = 0; index < array_size_list[0]; index++) {
             child = cJSON_GetArrayItem(json, index);
             if (array_size_list[1]) {

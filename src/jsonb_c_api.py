@@ -191,7 +191,7 @@ class generator:
             self.__writeline('        json_child = cJSON_CreateArray();')
             self.__writeline('        cJSON_AddItemToObject(json, "{0}", json_child);'.format(element))
             self.__writeline('    }')
-            self.__writeline('    const size_t array_size_list[] = {' + '{0},0'.format(size) + '};')
+            self.__writeline('    const size_t array_size_list[8 + 2] = {' + '{0},0'.format(size) + '};')
             self.__writeline('    jsonb_opt_array(opt, json_child, element->{0}, {1} * array_size_list[0], array_size_list, jsonb_opt_string);'.format(element, length))
             self.__writeline('}')
 
@@ -221,7 +221,7 @@ class generator:
             self.__writeline('        json_child = cJSON_CreateArray();')
             self.__writeline('        cJSON_AddItemToObject(json, "{0}", json_child);'.format(element))
             self.__writeline('    }')
-            self.__writeline('    const size_t array_size_list[] = {0};'.format(tmp))
+            self.__writeline('    const size_t array_size_list[8 + {0}] = {1};'.format(len(parameter[1:-1]), tmp))
             self.__writeline('    jsonb_opt_array(opt, json_child, element->{0}, sizeof({1}) * {2}, array_size_list, jsonb_opt_{1});'.format(element, type, num))
             self.__writeline('}')
 
