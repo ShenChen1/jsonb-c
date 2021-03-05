@@ -93,29 +93,33 @@ static inline void jsonb_opt_string(jsonb_opt_e opt, cJSON *json, void *element,
     }
 }
 
-static inline void jsonb_opt_array(jsonb_opt_e opt, cJSON *json, void *e, size_t size, const size_t *array_size_list, jsonb_opt_func_t callback)
+static inline void jsonb_opt_array(jsonb_opt_e opt, cJSON *json, void *e, size_t size, const size_t *size_list_data, const int size_list_len, int layer, jsonb_opt_func_t callback)
 {
     size_t index = 0;
     cJSON *child = NULL;
     char *element = e;
-    size_t subsize = size / array_size_list[0];
+    size_t subsize = size / size_list_data[layer];
+
+    if (layer + 1 == size_list_len) {
+        return;
+    }
 
     if (opt == JSONB_OPT_J2S) {
         if (!cJSON_IsArray(json)) return;
-        if (cJSON_GetArraySize(json) != array_size_list[0]) return;
-        for (index = 0; index < array_size_list[0]; index++) {
+        if (cJSON_GetArraySize(json) != size_list_data[layer]) return;
+        for (index = 0; index < size_list_data[layer]; index++) {
             child = cJSON_GetArrayItem(json, index);
-            if (array_size_list[1]) {
-                jsonb_opt_array(opt, child, element + index * subsize, subsize, &array_size_list[1], callback);
+            if (size_list_data[layer + 1]) {
+                jsonb_opt_array(opt, child, element + index * subsize, subsize, size_list_data, size_list_len, layer + 1, callback);
             } else {
                 callback(opt, child, element + index * subsize, subsize);
             }
         }
     } else if (opt == JSONB_OPT_S2J) {
-        for (index = 0; index < array_size_list[0]; index++) {
-            if (array_size_list[1]) {
+        for (index = 0; index < size_list_data[layer]; index++) {
+            if (size_list_data[layer + 1]) {
                 child = cJSON_CreateArray();
-                jsonb_opt_array(opt, child, element + index * subsize, subsize, &array_size_list[1], callback);
+                jsonb_opt_array(opt, child, element + index * subsize, subsize, size_list_data, size_list_len, layer + 1, callback);
             } else {
                 child = cJSON_CreateObject();
                 callback(opt, child, element + index * subsize, subsize);
