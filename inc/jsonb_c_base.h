@@ -93,15 +93,53 @@ static inline void jsonb_opt_string(jsonb_opt_e opt, cJSON *json, void *element,
     }
 }
 
+typedef struct {
+    int value;
+    const char *string;
+} josnb_enum_t;
+
+static inline void jsonb_opt_enum(jsonb_opt_e opt, cJSON *json, void *element, size_t size, const josnb_enum_t *enummap, size_t enumsize)
+{
+    int i = 0;
+    assert(sizeof(int) == size);
+
+    if (opt == JSONB_OPT_J2S) {
+        if (!cJSON_IsString(json)) return;
+        for (i = 0; i < enumsize; i++) {
+            if (!strcmp(cJSON_GetStringValue(json), enummap[i].string)) {
+                memcpy(element, (void *)&enummap[i].value, sizeof(int));
+                break;
+            }
+        }
+    } else if (opt == JSONB_OPT_S2J) {
+        for (i = 0; i < enumsize; i++) {
+            if (!memcmp(element, &enummap[i].value, sizeof(int))) {
+                jsonb_opt_string(opt, json, (void *)enummap[i].string, strlen(enummap[i].string) + 1);
+                break;
+            }
+        }
+    }
+
+    /* set default */
+    if (i == enumsize) {
+        const int tmp_v = INT_MAX;
+        const char *tmp_s = "unknown";
+        jsonb_opt_string(JSONB_OPT_S2J, json, (void *)tmp_s, strlen(tmp_s) + 1);
+        memcpy(element, (void *)&tmp_v, sizeof(tmp_v));
+    }
+}
+
 static inline void jsonb_opt_array(jsonb_opt_e opt, cJSON *json, void *e, size_t size, const size_t *size_list_data, const int size_list_len, int layer, jsonb_opt_func_t callback)
 {
     size_t index = 0;
     cJSON *child = NULL;
     char *element = e;
-    size_t subsize = size / size_list_data[layer];
+    size_t subsize = 0;
 
-    if (layer + 1 == size_list_len) {
+    if (layer + 1 == size_list_len || !size_list_data[layer]) {
         return;
+    } else {
+        subsize = size / size_list_data[layer];
     }
 
     if (opt == JSONB_OPT_J2S) {

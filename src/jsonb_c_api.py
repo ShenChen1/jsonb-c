@@ -75,6 +75,9 @@ class generator:
         d['JSONB_UNION_START'] = self.__deal_with_union_start
         d['JSONB_UNION_END'] = self.__deal_with_union_end
         d['JSONB_UNION_FIELD'] = self.__deal_with_union_field
+        d['JSONB_ENUM_START'] = self.__deal_with_enum_start
+        d['JSONB_ENUM_END'] = self.__deal_with_enum_end
+        d['JSONB_ENUM_FIELD'] = self.__deal_with_enum_field
 
         pattern = re.compile(r"^(\w+)\(([\w\.\/]+|\w+,.*|\w+\(.*\),.*|)\)$")
         match = pattern.match(line)
@@ -278,3 +281,35 @@ class generator:
             self.__writeline('    }')
             self.__writeline('    jsonb_opt_{0}(opt, json_child, &element->{1}, sizeof({0}));'.format(type, element))
             self.__writeline('}')
+
+    def __deal_with_enum_start(self, line):
+        parameter = line.split(',')
+        [type] = parameter
+        if self.__mode == "header":
+            self.__writeline('extern void jsonb_opt_{0}(jsonb_opt_e opt, cJSON *json, void *element, size_t size);'.format(type))
+            self.__writeline('typedef enum {')
+        else:
+            self.__writeline('void jsonb_opt_{0}(jsonb_opt_e opt, cJSON *json, void *e, size_t size)'.format(type))
+            self.__writeline('{')
+            self.__writeline('    const josnb_enum_t enummap[] = {')
+
+    def __deal_with_enum_end(self, line):
+        parameter = line.split(',')
+        [type] = parameter
+        if self.__mode == "header":
+            self.__writeline('} ' + '{0};'.format(type))
+        else:
+            self.__writeline('    };')
+            self.__writeline('    jsonb_opt_enum(opt, json, e, size, enummap, sizeof(enummap)/sizeof(enummap[0]));')
+            self.__writeline('}')
+
+    def __deal_with_enum_field(self, line):
+        parameter = line.split(',')
+        element = parameter[0]
+        if self.__mode == "header":
+            if len(parameter) == 2:
+                self.__writeline('    {0} = {1},'.format(element, parameter[1]))
+            else:
+                self.__writeline('    {0},'.format(element))
+        else:
+            self.__writeline('        { ' + '{0}, "{1}"'.format(element, element) + ' },')

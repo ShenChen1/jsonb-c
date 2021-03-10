@@ -5,6 +5,7 @@
 static student_t orignal_student = {
     .person = {
         .name = "peter",
+        .gender = Male,
         .married = false,
         .height = 180.0,
         .weight = 150.0,
@@ -30,6 +31,7 @@ static student_t orignal_student = {
     .scores[1] = 60,
     .teachers[0] = {
         .name = "a",
+        .gender = Female,
         .married = true,
         .age = 35,
         .birthday = UINT32_MAX,
