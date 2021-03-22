@@ -20,6 +20,9 @@
 | JSONB_UNION_START(type)                                | Use it to start declaring a union named `type`
 | JSONB_UNION_END(type)                                  | Use it at the end of union declaration
 | JSONB_UNION_FIELD(element, type)                       | Use it for `type element` in union depending on `condition`
+| JSONB_ENUM_START(type)                                 | Use it to start declaring a enum named `type`
+| JSONB_ENUM_END(type)                                   | Use it at the end of enum declaration
+| JSONB_ENUM_FIELD(element[, value])                     | Use it for `element = value` in enum, `value` can be omitted
 
 [example](https://github.com/ShenChen1/jsonb-c/blob/master/example/example.jsonb)
 
