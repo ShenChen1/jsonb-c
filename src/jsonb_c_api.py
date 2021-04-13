@@ -75,6 +75,9 @@ class generator:
         d['JSONB_UNION_START'] = self.__deal_with_union_start
         d['JSONB_UNION_END'] = self.__deal_with_union_end
         d['JSONB_UNION_FIELD'] = self.__deal_with_union_field
+        d['JSONB_UNION2_START'] = self.__deal_with_union2_start
+        d['JSONB_UNION2_END'] = self.__deal_with_union2_end
+        d['JSONB_UNION2_FIELD'] = self.__deal_with_union2_field
         d['JSONB_ENUM_START'] = self.__deal_with_enum_start
         d['JSONB_ENUM_END'] = self.__deal_with_enum_end
         d['JSONB_ENUM_FIELD'] = self.__deal_with_enum_field
@@ -270,6 +273,51 @@ class generator:
             self.__writeline('        {0} {1};'.format(type, element))
         else:
             self.__writeline('if (!strncmp("{0}", element->condition, sizeof("{0}")))'.format(element))
+            self.__writeline('{')
+            self.__writeline('    cJSON *json_child = NULL;')
+            self.__writeline('    if (opt == JSONB_OPT_J2S) {')
+            self.__writeline('        if (cJSON_IsNull(json)) return;')
+            self.__writeline('            json_child = cJSON_GetObjectItem(json, "{0}");'.format(element))
+            self.__writeline('    } else if (opt == JSONB_OPT_S2J) {')
+            self.__writeline('        json_child = cJSON_CreateObject();')
+            self.__writeline('        cJSON_AddItemToObject(json, "{0}", json_child);'.format(element))
+            self.__writeline('    }')
+            self.__writeline('    jsonb_opt_{0}(opt, json_child, &element->{1}, sizeof({0}));'.format(type, element))
+            self.__writeline('}')
+
+    def __deal_with_union2_start(self, line):
+        parameter = line.split(',')
+        [name, key] = parameter
+        if self.__mode == "header":
+            self.__writeline('    char {0}[{1}];'.format(key, 32))
+            self.__writeline('    union {')
+        else:
+            self.__writeline('{')
+            self.__writeline('    cJSON *json_child = NULL;')
+            self.__writeline('    if (opt == JSONB_OPT_J2S) {')
+            self.__writeline('        if (cJSON_IsNull(json)) return;')
+            self.__writeline('        json_child = cJSON_GetObjectItem(json, "{0}");'.format(key))
+            self.__writeline('    } else if (opt == JSONB_OPT_S2J) {')
+            self.__writeline('        json_child = cJSON_CreateObject();')
+            self.__writeline('        cJSON_AddItemToObject(json, "{0}", json_child);'.format(key))
+            self.__writeline('    }')
+            self.__writeline('    jsonb_opt_string(opt, json_child, element->{0}, {1});'.format(key, 32))
+
+    def __deal_with_union2_end(self, line):
+        parameter = line.split(',')
+        [name, key] = parameter
+        if self.__mode == "header":
+            self.__writeline('    };')
+        else:
+            self.__writeline('}')
+
+    def __deal_with_union2_field(self, line):
+        parameter = line.split(',')
+        [element, type, key] = parameter
+        if self.__mode == "header":
+            self.__writeline('        {0} {1};'.format(type, element))
+        else:
+            self.__writeline('if (!strncmp("{0}", element->{1}, sizeof("{0}")))'.format(element, key))
             self.__writeline('{')
             self.__writeline('    cJSON *json_child = NULL;')
             self.__writeline('    if (opt == JSONB_OPT_J2S) {')

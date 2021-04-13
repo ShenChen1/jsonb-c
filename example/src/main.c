@@ -20,6 +20,7 @@ static student_t orignal_student = {
         .col = SHRT_MIN,
         .total = LONG_MAX,
         .id = LONG_MIN,
+        .condition = "c",
     },
     .union_test = {
         .condition = "b",
