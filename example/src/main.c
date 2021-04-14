@@ -20,7 +20,6 @@ static student_t orignal_student = {
         .col = SHRT_MIN,
         .total = LONG_MAX,
         .id = LONG_MIN,
-        .condition = "c",
     },
     .union_test = {
         .condition = "b",
@@ -57,6 +56,7 @@ static student_t orignal_student = {
         {{31,32}, {33,34}, {35,36}},
         {{41,42}, {43,44}, {45,46}},
     },
+    .color = "red",
 };
 
 int main(void) {
