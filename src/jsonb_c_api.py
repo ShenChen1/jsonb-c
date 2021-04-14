@@ -69,6 +69,8 @@ class generator:
         d['JSONB_MACRO_DEFINE'] = self.__deal_with_macro_define
         d['JSONB_STRUCT_START'] = self.__deal_with_struct_start
         d['JSONB_STRUCT_END'] = self.__deal_with_struct_end
+        d['JSONB_ANON_STRUCT_START'] = self.__deal_with_anon_struct_start
+        d['JSONB_ANON_STRUCT_END'] = self.__deal_with_anon_struct_end
         d['JSONB_FIELD'] = self.__deal_with_field
         d['JSONB_STRING'] = self.__deal_with_string
         d['JSONB_FIELD_ARRAY'] = self.__deal_with_field_array
@@ -145,6 +147,19 @@ class generator:
             self.__writeline('} ' + '{0};'.format(type))
         else:
             self.__writeline('}')
+
+    def __deal_with_anon_struct_start(self, line):
+        if self.__mode == "header":
+            self.__writeline('    struct {')
+        else:
+            self.__writeline('{')
+
+    def __deal_with_anon_struct_end(self, line):
+        if self.__mode == "header":
+            self.__writeline('    };')
+        else:
+            self.__writeline('}')
+        self.__union_key = None
 
     def __deal_with_field(self, line):
         parameter = line.split(',')
@@ -271,7 +286,7 @@ class generator:
         parameter = line.split(',')
         [element, type] = parameter
         if self.__mode == "header":
-            self.__writeline('        {0} {1};'.format(type, element))
+            self.__writeline('    {0} {1};'.format(type, element))
         else:
             self.__writeline('if (!strncmp("{0}", element->{1}, sizeof("{0}")))'.format(element, self.__union_key))
             self.__writeline('{')
