@@ -52,4 +52,4 @@ jsonb_opt_student_t(JSONB_OPT_S2J, json, &orignal_student, sizeof(student_t));
 jsonb_opt_student_t(JSONB_OPT_J2S, json, &student, sizeof(student_t));
 ```
 
-[example](https://github.com/ShenChen1/jsonb-c/blob/master/example/main.c)
+[example](https://github.com/ShenChen1/jsonb-c/blob/master/example/src/main.c)
